@@ -1,0 +1,6 @@
+[submodule "kernel"]
+	path = kernel
+	url = https://github.com/fishjump/FirdKernel.git
+[submodule "bootloader"]
+	path = bootloader
+	url = https://github.com/fishjump/FirdLoader.git

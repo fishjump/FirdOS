@@ -1,0 +1,48 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="pre-build" DefaultTargets="build" ToolsVersion="16.0">
+
+    <!-- Project -->
+    <PropertyGroup>
+        <BuildPath>$(MSBuildStartupDirectory)/build</BuildPath>
+        <AssetsPath>$(MSBuildProjectDirectory)/assets</AssetsPath>
+    </PropertyGroup>
+
+    <!-- Subprojects -->
+    <ItemGroup>
+        <Subproject Include="bootloader">
+            <ProjectPath>bootloader/FirdLoader.vcxproj</ProjectPath>
+        </Subproject>
+
+        <Subproject Include="kernel">
+            <ProjectPath>kernel/FirdKernel.vcxproj</ProjectPath>
+        </Subproject>
+    </ItemGroup>
+
+    <!-- Targets -->
+    <Target Name="build">
+        <Message Text="Building $(MSBuildProjectName)." />
+        <MSBuild Projects="%(Subproject.ProjectPath)" />
+    </Target>
+
+    <Target Name="make-image">
+        <Message Text="Making image $(MSBuildProjectName)." />
+        <Exec Command="dd if=/dev/zero of=$(BuildPath)/$(MSBuildProjectName).img bs=512 count=100000 status=none" EchoOff="true" />
+        <Exec Command="mformat -i $(BuildPath)/$(MSBuildProjectName).img -f 1440" EchoOff="true" />
+        <Exec Command="mmd -i $(BuildPath)/$(MSBuildProjectName).img ::/EFI" EchoOff="true" />
+        <Exec Command="mmd -i $(BuildPath)/$(MSBuildProjectName).img ::/EFI/BOOT" EchoOff="true" />
+        <Exec Command="mcopy -i $(BuildPath)/$(MSBuildProjectName).img $(AssetsPath)/zap-ext-light16.psf ::" EchoOff="true" />
+        <Exec Command="mcopy -i $(BuildPath)/$(MSBuildProjectName).img $(BuildPath)/FirdLoader/bootx64.efi ::/EFI/BOOT" EchoOff="true" />
+        <Exec Command="mcopy -i $(BuildPath)/$(MSBuildProjectName).img $(BuildPath)/FirdKernel/kernel.elf ::" EchoOff="true" />
+    </Target>
+
+    <Target Name="pre-build">
+        <MakeDir Directories="$(BuildPath)" />
+        <Exec Command="cd bootloader; git submodule update --init; cd ..;" EchoOff="true" />
+        <Exec Command="cd kernel; git submodule update --init; cd ..;" EchoOff="true" />
+    </Target>
+
+    <Target Name="clean">
+        <Message Text="Cleaning $(MSBuildProjectName)." />
+        <MSBuild Projects="%(Subproject.ProjectPath)" Targets="clean" />
+    </Target>
+
+</Project>
