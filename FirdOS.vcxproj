@@ -23,7 +23,7 @@
         <MSBuild Projects="%(Subproject.ProjectPath)" />
     </Target>
 
-    <Target Name="make-image">
+    <Target Name="make-image" DependsOnTargets="build">
         <Message Text="Making image $(MSBuildProjectName)." />
         <Exec Command="dd if=/dev/zero of=$(BuildPath)/$(MSBuildProjectName).img bs=512 count=100000 status=none" EchoOff="true" />
         <Exec Command="mformat -i $(BuildPath)/$(MSBuildProjectName).img -f 1440" EchoOff="true" />
@@ -32,6 +32,10 @@
         <Exec Command="mcopy -i $(BuildPath)/$(MSBuildProjectName).img $(AssetsPath)/zap-ext-light16.psf ::" EchoOff="true" />
         <Exec Command="mcopy -i $(BuildPath)/$(MSBuildProjectName).img $(BuildPath)/FirdLoader/bootx64.efi ::/EFI/BOOT" EchoOff="true" />
         <Exec Command="mcopy -i $(BuildPath)/$(MSBuildProjectName).img $(BuildPath)/FirdKernel/kernel.elf ::" EchoOff="true" />
+    </Target>
+
+    <Target Name="run" DependsOnTargets="make-image">
+        <Exec Command="qemu-system-x86_64 -bios OVMF.fd -drive file=build/FirdOS.img,format=raw -net none -m 512M" />
     </Target>
 
     <Target Name="pre-build">
