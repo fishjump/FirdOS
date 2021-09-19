@@ -5,7 +5,8 @@
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/kernel/modules/bootloader/includes",
-                "${workspaceFolder}/kernel/modules/libcore/includes"
+                "${workspaceFolder}/kernel/modules/libcore/includes",
+                "${workspaceFolder}/kernel/modules/libgdt/includes"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
